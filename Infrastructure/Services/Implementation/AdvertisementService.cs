@@ -30,10 +30,17 @@ namespace Infrastructure.Services.Implementation
         public async Task<Core.Entities.Response<Core.DTOs.GetAdvertisementDto>> GetById(int id)
         {
             var serviceResponse = new Core.Entities.Response<Core.DTOs.GetAdvertisementDto>();
+            try
+            {
+                var dbAdvertisement = await _context.Advertisement.FirstOrDefaultAsync(c => c.Id == id);
 
-            var dbAdvertisement = await _context.Advertisement.FirstOrDefaultAsync(c => c.Id == id);
-
-            serviceResponse.Data = _mapper.Map<Core.DTOs.GetAdvertisementDto>(dbAdvertisement);
+                serviceResponse.Data = _mapper.Map<Core.DTOs.GetAdvertisementDto>(dbAdvertisement);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;   
+                serviceResponse.Message = ex.Message;
+            }
 
             return serviceResponse;
         }
@@ -46,13 +53,20 @@ namespace Infrastructure.Services.Implementation
         public async Task<Core.Entities.Response<Core.DTOs.GetAdvertisementDto>> Insert(Core.DTOs.AddAdvertisementDto AdvertisementDto)
         {
             var serviceResponse = new Core.Entities.Response<Core.DTOs.GetAdvertisementDto>();
-            
-            var Advertisement = _mapper.Map<Core.Entities.Advertisement>(AdvertisementDto);
+            try
+            {
+                var Advertisement = _mapper.Map<Core.Entities.Advertisement>(AdvertisementDto);
 
-            _context.Advertisement.Add(_mapper.Map<Core.Entities.Advertisement>(Advertisement));
-            await _context.SaveChangesAsync();
+                _context.Advertisement.Add(_mapper.Map<Core.Entities.Advertisement>(Advertisement));
+                await _context.SaveChangesAsync();
 
-            serviceResponse.Data = _mapper.Map<Core.DTOs.GetAdvertisementDto>(Advertisement);
+                serviceResponse.Data = _mapper.Map<Core.DTOs.GetAdvertisementDto>(Advertisement);
+            }
+            catch(Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
 
             return serviceResponse;
         }
@@ -99,13 +113,18 @@ namespace Infrastructure.Services.Implementation
         /// <returns>List of advertisements.</returns>
         public async Task<Core.Entities.Response<System.Collections.Generic.IList<Core.DTOs.GetAdvertisementDto>>> GetAll()
         {
-            var allAds = await _context.Advertisement.ToListAsync();
+            var serviceResponse = new Core.Entities.Response<System.Collections.Generic.IList<Core.DTOs.GetAdvertisementDto>>();
+            try 
+            { 
+                var allAds = await _context.Advertisement.ToListAsync();
 
-            var serviceResponse = new Core.Entities.Response<System.Collections.Generic.IList<Core.DTOs.GetAdvertisementDto>>()
+                serviceResponse.Data = allAds.ToList().Select(ad => _mapper.Map<Core.DTOs.GetAdvertisementDto>(ad)).ToList();                
+            }
+            catch(Exception ex)
             {
-                Data = allAds.ToList().Select(ad => _mapper.Map<Core.DTOs.GetAdvertisementDto>(ad)).ToList()
-            };
-
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
             return serviceResponse;
         }
 

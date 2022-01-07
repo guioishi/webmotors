@@ -10,13 +10,20 @@ namespace Infrastructure.Data
         /// <summary>
         /// Class constructor.
         /// </summary>
+        public DataContext()
+        {
+            // used in unit test
+        }
+
+        /// <summary>
+        /// Class constructor.
+        /// </summary>
         /// <param name="options">Database context options.</param>
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
         }
 
-
-        public DbSet<Core.Entities.Advertisement> Advertisement { get; set; }
+        public virtual DbSet<Core.Entities.Advertisement> Advertisement { get; set; }
 
         public Task<int> SaveChangesAsync()
         {
